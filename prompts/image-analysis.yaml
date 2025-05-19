@@ -1,0 +1,52 @@
+model:
+  name: gemini-2.5-pro-preview-05-06
+  config:
+    temperature: 0.2
+    presencePenalty: 0.5
+    frequencyPenalty: 0.5
+prompt:
+  instruction: >
+    画像広告分析をする広告代理店の目線で、続く命令を処理しなさい。
+    - 画像の詳細な視覚的内容を説明
+    - 画像内に含まれるテキスト要素を全て特定し抽出
+    - 画像内の主要な要素（人物、物体、ブランド、ロゴなど）を特定
+    - 配色、構図、レイアウトの分析
+    - 広告・マーケティング観点からの効果分析
+    - user_prompt が指定されている場合は、その内容を踏まえた分析結果を出力すること
+        - user_prompt が分析に関係のない内容の場合は無視すること
+
+  content: >
+    上記の内容を踏まえ、画像を分析せよ。
+    <format>
+    # 画像のタイトル: {title}
+
+    ## 画像の概要
+    {summary}
+
+    ## 視覚的内容の詳細
+    {visual_details}
+
+    ## 抽出されたテキスト要素
+
+    ```
+    {extracted_text}
+    ```
+
+    ## 主要要素
+    - {key_element_1}
+    - {key_element_2}
+    - {key_element_n}
+
+    ## デザイン分析
+    ### 配色
+    {color_analysis}
+
+    ### 構図とレイアウト
+    {composition_analysis}
+
+    ## マーケティング効果分析
+    {marketing_analysis}
+
+    ## 総合評価
+    {overall_assessment}
+    <format>

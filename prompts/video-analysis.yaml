@@ -1,0 +1,55 @@
+model:
+  name: gemini-2.5-pro-preview-05-06
+  config:
+    temperature: 0.2
+    presencePenalty: 0.5
+    frequencyPenalty: 0.5
+prompt:
+  instruction: >
+    動画広告分析をする広告代理店の目線で、続く命令を処理しなさい。
+    - 動画のタイムライン付きの文字起こし
+    - 動画上の字幕の取得とタイムライン付き文字起こし
+    - 時間の表記は、 00:00 のようにゼロ埋め形式で出力すること
+    - 内容の要約
+    - user_prompt が指定されている場合は、その内容を踏まえた分析結果を出力すること
+        - user_prompt が分析に関係のない内容の場合は無視すること
+
+  content: >
+    上記の内容を踏まえ、動画内容を分析せよ。
+    <format>
+    # 動画のタイトル: {title}
+
+    # 動画の説明
+    {summary}
+
+    # 文字起こし
+
+    ```
+    00:00: {voice_transcription}
+    00:01: {voice_transcription}
+    00:02: {voice_transcription}
+    ...
+    00:31: {voice_transcription}
+    ````
+
+    # 字幕文字起こし (optional)
+
+    ```
+    00:00: {subtitles_transcript} ({position})
+    00:01: {subtitles_transcript} ({position})
+    <instruction>
+    同じ時間に複数の単語がある場合は、タイムラインを分けず、1つのグループとして出力せよ
+      <example>
+        00:02-00:05:
+        {subtitles_transcript1} ({position})
+        {subtitles_transcript2} ({position})
+        {subtitles_transcript3} ({position})
+      </examle> 
+    </instruction>
+    ...
+    00:31: {subtitles_transcript} ({position})
+    ````
+
+    # 分析結果
+    {analysis_results}
+    </format>`
