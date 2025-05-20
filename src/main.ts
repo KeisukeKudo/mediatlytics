@@ -10,7 +10,11 @@ const app = new bolt.App({
   signingSecret: process.env.SLACK_SIGNING_SECRET,
 });
 
-app.use(async ({ next }) => {
+app.use(async ({ context, next }) => {
+  if (context.retryNum) {
+    console.debug("retryNum", context.retryNum);
+    return;
+  }
   await next();
 });
 
