@@ -18,8 +18,10 @@ app.use(async ({ context, next }) => {
   await next();
 });
 
+/**
+ * DM チャンネルのみ､添付ファイルがあり､スレッドメッセージでない場合に処理を実行
+ */
 app.message(async ({ message, say, client, context }) => {
-  // DM チャンネルではない or スレッドメッセージではない or 添付ファイルがない場合は無視
   if (message.channel_type !== "im" || "thread_ts" in message || !("files" in message)) {
     return;
   }
