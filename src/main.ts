@@ -26,9 +26,9 @@ app.message(async ({ message, say, client, context }) => {
     return;
   }
 
-  const progress = await say({ text: "分析中…… 🔎", thread_ts: message.ts });
-
   try {
+    const progress = await say({ text: "分析中…… 🔎", thread_ts: message.ts });
+
     const files = (message.files ?? []).filter((file) => {
       const mimetype = file.mimetype ?? "";
       return mimetype.startsWith("video/") || mimetype.startsWith("image/");
@@ -45,31 +45,49 @@ app.message(async ({ message, say, client, context }) => {
 
     const userId = context.userId ?? "";
     const userPrompt = message.text ?? "";
-    const gcsFiles = await Promise.all(files.map(async (file) => getStorageUri(file, userId, message.ts, say)));
+    const gcsFiles = await Promise.all(
+      files.map(async (file) => {
+        const ts = message.ts;
+        return getStorageUri(file, userId, ts).catch(async (e) => {
+          await handleError(`ファイル「${file.name}」の処理中にエラーが発生しました`, e, ts, say);
+          return null;
+        });
+      })
+    );
     const results = await Promise.all(
       gcsFiles.filter((file) => file !== null).map((file) => analyze(file.title, file.uri, userPrompt, file.mimetype))
     );
 
-    for (const result of results) {
-      const title = result.title ?? "";
-      await client.filesUploadV2({
-        channel_id: message.channel ?? "",
-        thread_ts: message.ts,
-        initial_comment: `${title} の分析が完了しました。`,
-        filename: `${title}.md`,
-        content: result.content,
-      });
-    }
+    await Promise.all(
+      results.map((result) => {
+        const title = result.title ?? "";
+        return client.filesUploadV2({
+          channel_id: message.channel ?? "",
+          thread_ts: message.ts,
+          initial_comment: `${title} の分析が完了しました。`,
+          filename: `${title}.md`,
+          content: result.content,
+        });
+      })
+    );
+
     await client.chat.delete({
       channel: progress.channel ?? "",
       ts: progress.ts ?? "",
     });
     console.info("finished", `${results.length} files`);
-  } catch (error) {
-    console.error("分析に失敗:", error);
-    await say({ text: "分析に失敗しました。", thread_ts: message.ts });
+  } catch (e) {
+    await handleError("分析に失敗しました", e, message.ts, say);
   }
 });
+
+async function handleError(label: string, error: any, ts: string, say: bolt.SayFn) {
+  console.error(`${label}: `, error);
+  await say({
+    text: label,
+    thread_ts: ts,
+  }).catch(console.error);
+}
 
 (async () => {
   await app.start(Number(process.env.PORT) || 8080);

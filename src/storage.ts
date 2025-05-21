@@ -2,7 +2,6 @@ import { Storage } from "@google-cloud/storage";
 import dotenv from "dotenv";
 import { pipeline } from "node:stream/promises";
 import { Readable } from "node:stream";
-import { SayFn } from "@slack/bolt";
 import path from "path";
 import { findUp } from "find-up";
 import fs from "node:fs";
@@ -23,10 +22,9 @@ type File = {
  * @param {any} file
  * @param {string} userId
  * @param {string} ts
- * @param {SayFn} say
  * @returns Google Cloud Storage URI
  */
-export async function getStorageUri(file: any, userId: string, ts: string, say: SayFn): Promise<File | null> {
+export async function getStorageUri(file: any, userId: string, ts: string): Promise<File> {
   const tempPath = path.join(root, "./temp", `${userId}-${ts}-${file.name}`);
   try {
     const response = await fetch(file.url_private_download, {
@@ -45,7 +43,7 @@ export async function getStorageUri(file: any, userId: string, ts: string, say: 
 
     const storage = new Storage();
     const prefix = process.env.STORAGE_PREFIX ?? "";
-    const destPath = [prefix, userId, ts, file.name].filter((e) => e !== "").join("/");
+    const destPath = [prefix, userId, ts, file.name].filter((v) => v !== "").join("/");
     const bucketName = process.env.STORAGE_BUCKET;
     if (!bucketName) {
       throw new Error("STORAGE_BUCKET is not set");
@@ -60,14 +58,7 @@ export async function getStorageUri(file: any, userId: string, ts: string, say: 
       uri: `gs://${bucketName}/${destPath}`,
       mimetype: file.mimetype,
     };
-  } catch (error) {
-    console.error("ファイルのダウンロードに失敗:", error);
-    await say({
-      text: `ファイル「${file.name}」の処理中にエラーが発生しました`,
-      thread_ts: ts,
-    });
   } finally {
     if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath);
   }
-  return null;
 }
