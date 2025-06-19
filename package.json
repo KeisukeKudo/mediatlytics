@@ -17,17 +17,17 @@
   "description": "",
   "dependencies": {
     "@google-cloud/storage": "^7.16.0",
-    "@google/genai": "^1.0.1",
-    "@slack/bolt": "^4.3.0",
+    "@google/genai": "^1.5.1",
+    "@slack/bolt": "^4.4.0",
     "@slack/types": "^2.14.0",
     "dotenv": "^16.5.0",
     "find-up": "^7.0.0",
     "js-yaml": "^4.1.0"
   },
   "devDependencies": {
-    "@tsconfig/node23": "^23.0.1",
+    "@tsconfig/node23": "^23.0.2",
     "@types/js-yaml": "^4.0.9",
-    "@types/node": "^22.15.18",
+    "@types/node": "^24.0.3",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"
   }
